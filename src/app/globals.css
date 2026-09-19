@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #1f3d33; /* أخضر داكن */
+  --color-primary-foreground: #ffffff;
+  --color-accent: #856b32; /* ذهبي */
+  --color-accent-foreground: #ffffff;
+  --color-page-bg: #ebf6ee; /* نعناعي فاتح */
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1a1a;
+  --color-muted: #5b6b64;
+  --color-border: #d9e8dd;
+  --color-success: #2f9e58;
+  --color-success-bg: #e5f6ea;
+  --color-warning: #b9791f;
+  --color-warning-bg: #fbecd4;
+  --color-danger: #c53030;
+  --color-danger-bg: #fbe3e3;
+}
+
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-page-bg: var(--color-page-bg);
+  --color-card: var(--color-card);
+  --color-card-foreground: var(--color-card-foreground);
+  --color-muted: var(--color-muted);
+  --color-border: var(--color-border);
+  --color-success: var(--color-success);
+  --color-success-bg: var(--color-success-bg);
+  --color-warning: var(--color-warning);
+  --color-warning-bg: var(--color-warning-bg);
+  --color-danger: var(--color-danger);
+  --color-danger-bg: var(--color-danger-bg);
+  --font-sans: var(--font-tajawal);
+}
+
+body {
+  background: var(--color-page-bg);
+  color: var(--color-card-foreground);
+  font-family: var(--font-sans), "Tahoma", sans-serif;
+  font-size: 15px;
+}

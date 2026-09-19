@@ -1,0 +1,515 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+enum Role {
+  SUPER_ADMIN
+  RECORDS
+  INTERN
+  STUDENT
+  SUPERVISOR
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+  EXPIRED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Difficulty {
+  SIMPLE
+  MEDIUM
+  COMPLEX
+}
+
+enum Priority {
+  NORMAL
+  URGENT
+}
+
+enum ClinicType {
+  STUDENT
+  SPECIALTY
+}
+
+enum CaseStatus {
+  DRAFT
+  PENDING_REVIEW
+  NEEDS_REVISION
+  REJECTED
+  IN_BANK
+  BOOKED
+  SCHEDULED
+  IN_TREATMENT
+  PENDING_EVALUATION
+  COMPLETED
+  CANCELLED
+}
+
+enum RadiographType {
+  PA
+  BITEWING
+  OPG
+  CBCT
+}
+
+enum AttendanceStatus {
+  PENDING
+  ATTENDED
+  NO_SHOW
+  LATE
+}
+
+enum CallDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CallType {
+  REMINDER
+  CONFIRMATION
+  FOLLOW_UP
+  COMPLAINT
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+}
+
+enum PatientStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+// -----------------------------------------------------------------------------
+// Identity & access
+// -----------------------------------------------------------------------------
+
+model User {
+  id                  String     @id @default(cuid())
+  username            String     @unique
+  passwordHash        String
+  role                Role
+  fullName            String
+  email               String?
+  phone               String?
+  status              UserStatus @default(ACTIVE)
+  mustChangePassword  Boolean    @default(true)
+  twoFactorEnabled    Boolean    @default(false)
+  failedLoginAttempts Int        @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  accountExpiresAt    DateTime?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  studentProfile    StudentProfile?
+  internProfile     InternProfile?
+  supervisorProfile SupervisorProfile?
+
+  passwordHistory PasswordHistory[]
+  resetTokens     PasswordResetToken[]
+  auditLogs       AuditLog[]
+  notifications   Notification[]
+  patientsCreated Patient[]            @relation("PatientCreatedBy")
+
+  casesCreated      ClinicalCase[]      @relation("CaseCreatedByIntern")
+  casesReviewed     ClinicalCase[]      @relation("CaseReviewedBySupervisor")
+  casesBooked       ClinicalCase[]      @relation("CaseBookedByStudent")
+  caseStatusChanges CaseStatusHistory[] @relation("CaseStatusChangedBy")
+  evaluationsGiven  Evaluation[]        @relation("EvaluationBySupervisor")
+  callsHandled      Call[]              @relation("CallHandledByStaff")
+
+  @@index([role])
+  @@map("users")
+}
+
+model PasswordHistory {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@map("password_history")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model StudentProfile {
+  id             String            @id @default(cuid())
+  userId         String            @unique
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentNumber  String            @unique
+  level          String
+  academicTermId String?
+  academicTerm   AcademicPeriod?   @relation(fields: [academicTermId], references: [id])
+  groupId        String?
+  group          SupervisionGroup? @relation(fields: [groupId], references: [id])
+
+  bookedCases ClinicalCase[] @relation("StudentBookings")
+
+  @@map("student_profiles")
+}
+
+model InternProfile {
+  id            String            @id @default(cuid())
+  userId        String            @unique
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rotationLabel String?
+  department    String?
+  groupId       String?
+  group         SupervisionGroup? @relation(fields: [groupId], references: [id])
+
+  @@map("intern_profiles")
+}
+
+model SupervisorProfile {
+  id          String     @id @default(cuid())
+  userId      String     @unique
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialtyId String?
+  specialty   Specialty? @relation(fields: [specialtyId], references: [id])
+
+  groups SupervisionGroup[]
+
+  @@map("supervisor_profiles")
+}
+
+model SupervisionGroup {
+  id           String            @id @default(cuid())
+  name         String
+  supervisorId String
+  supervisor   SupervisorProfile @relation(fields: [supervisorId], references: [id])
+  createdAt    DateTime          @default(now())
+
+  students StudentProfile[]
+  interns  InternProfile[]
+
+  @@map("supervision_groups")
+}
+
+model AcademicPeriod {
+  id        String   @id @default(cuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+
+  students StudentProfile[]
+  quotas   GraduationQuota[]
+
+  @@map("academic_periods")
+}
+
+// -----------------------------------------------------------------------------
+// Reference data
+// -----------------------------------------------------------------------------
+
+model Specialty {
+  id       String  @id @default(cuid())
+  code     String  @unique
+  nameAr   String
+  nameEn   String
+  isActive Boolean @default(true)
+
+  procedures  Procedure[]
+  quotas      GraduationQuota[]
+  supervisors SupervisorProfile[]
+  cases       ClinicalCase[]
+
+  @@map("specialties")
+}
+
+model Procedure {
+  id          String     @id @default(cuid())
+  specialtyId String
+  specialty   Specialty  @relation(fields: [specialtyId], references: [id])
+  nameAr      String
+  nameEn      String
+  difficulty  Difficulty @default(MEDIUM)
+  isActive    Boolean    @default(true)
+
+  cases ClinicalCase[]
+
+  @@map("procedures")
+}
+
+model Clinic {
+  id       String     @id @default(cuid())
+  name     String
+  type     ClinicType
+  isActive Boolean    @default(true)
+
+  timeSlots    TimeSlot[]
+  appointments Appointment[]
+
+  @@map("clinics")
+}
+
+model TimeSlot {
+  id        String @id @default(cuid())
+  clinicId  String
+  clinic    Clinic @relation(fields: [clinicId], references: [id])
+  dayOfWeek Int // 0=Sunday .. 6=Saturday
+  startTime String // "08:00"
+  endTime   String // "09:00"
+  capacity  Int    @default(1)
+
+  @@map("time_slots")
+}
+
+model GraduationQuota {
+  id             String         @id @default(cuid())
+  level          String
+  specialtyId    String
+  specialty      Specialty      @relation(fields: [specialtyId], references: [id])
+  academicTermId String
+  academicTerm   AcademicPeriod @relation(fields: [academicTermId], references: [id])
+  requiredCount  Int
+
+  @@unique([level, specialtyId, academicTermId])
+  @@map("graduation_quotas")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+model NotificationTemplate {
+  id       String              @id @default(cuid())
+  eventKey String              @unique
+  titleAr  String
+  bodyAr   String
+  channel  NotificationChannel
+
+  @@map("notification_templates")
+}
+
+// -----------------------------------------------------------------------------
+// Patients
+// -----------------------------------------------------------------------------
+
+model Patient {
+  id                String        @id @default(cuid())
+  mrn               String        @unique
+  nationalId        String        @unique
+  fullName          String
+  dob               DateTime
+  gender            Gender
+  phone             String
+  address           String?
+  emergencyContact  String?
+  chronicConditions String?
+  allergies         String?
+  status            PatientStatus @default(ACTIVE)
+  createdById       String
+  createdBy         User          @relation("PatientCreatedBy", fields: [createdById], references: [id])
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  cases ClinicalCase[]
+  calls Call[]
+
+  @@index([fullName])
+  @@map("patients")
+}
+
+model Call {
+  id          String        @id @default(cuid())
+  patientId   String
+  patient     Patient       @relation(fields: [patientId], references: [id])
+  direction   CallDirection
+  type        CallType
+  outcome     String?
+  handledById String
+  handledBy   User          @relation("CallHandledByStaff", fields: [handledById], references: [id])
+  createdAt   DateTime      @default(now())
+
+  @@map("calls")
+}
+
+// -----------------------------------------------------------------------------
+// Clinical case lifecycle
+// -----------------------------------------------------------------------------
+
+model ClinicalCase {
+  id         String  @id @default(cuid())
+  caseNumber String  @unique
+  patientId  String
+  patient    Patient @relation(fields: [patientId], references: [id])
+  internId   String
+  intern     User    @relation("CaseCreatedByIntern", fields: [internId], references: [id])
+
+  chiefComplaint     String
+  medicalHistoryNote String?
+  clinicalExamNote   String
+  toothFdi           String?
+  specialtyId        String
+  specialty          Specialty  @relation(fields: [specialtyId], references: [id])
+  procedureId        String
+  procedure          Procedure  @relation(fields: [procedureId], references: [id])
+  difficulty         Difficulty
+  requiredLevel      String
+  priority           Priority   @default(NORMAL)
+  priorityReason     String?
+  consentConfirmed   Boolean    @default(false)
+  consentFileUrl     String?
+  notesForStudent    String?
+
+  status CaseStatus @default(DRAFT)
+
+  supervisorId String?
+  supervisor   User?     @relation("CaseReviewedBySupervisor", fields: [supervisorId], references: [id])
+  reviewedAt   DateTime?
+  reviewNote   String?
+
+  studentId            String?
+  studentProfileId     String?
+  studentProfile       StudentProfile? @relation("StudentBookings", fields: [studentProfileId], references: [id])
+  student              User?           @relation("CaseBookedByStudent", fields: [studentId], references: [id])
+  bookedAt             DateTime?
+  appointmentConfirmBy DateTime?
+
+  treatmentPlanFileUrl    String?
+  treatmentPlanApprovedAt DateTime?
+  completionSummary       String?
+
+  urgentFlagged Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  radiographs   Radiograph[]
+  statusHistory CaseStatusHistory[]
+  appointments  Appointment[]
+  evaluation    Evaluation?
+
+  @@index([status])
+  @@index([specialtyId])
+  @@map("clinical_cases")
+}
+
+model CaseStatusHistory {
+  id          String       @id @default(cuid())
+  caseId      String
+  case        ClinicalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  fromStatus  CaseStatus?
+  toStatus    CaseStatus
+  changedById String
+  changedBy   User         @relation("CaseStatusChangedBy", fields: [changedById], references: [id])
+  note        String?
+  createdAt   DateTime     @default(now())
+
+  @@index([caseId])
+  @@map("case_status_history")
+}
+
+model Radiograph {
+  id         String         @id @default(cuid())
+  caseId     String
+  case       ClinicalCase   @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  type       RadiographType
+  fileUrl    String
+  uploadedAt DateTime       @default(now())
+
+  @@map("radiographs")
+}
+
+model Appointment {
+  id           String           @id @default(cuid())
+  caseId       String
+  case         ClinicalCase     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  clinicId     String
+  clinic       Clinic           @relation(fields: [clinicId], references: [id])
+  scheduledAt  DateTime
+  attendance   AttendanceStatus @default(PENDING)
+  cancelledAt  DateTime?
+  cancelReason String?
+  createdAt    DateTime         @default(now())
+
+  @@map("appointments")
+}
+
+model Evaluation {
+  id           String       @id @default(cuid())
+  caseId       String       @unique
+  case         ClinicalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  supervisorId String
+  supervisor   User         @relation("EvaluationBySupervisor", fields: [supervisorId], references: [id])
+  score        Int
+  rubricNotes  String?
+  passed       Boolean
+  createdAt    DateTime     @default(now())
+
+  @@map("evaluations")
+}
+
+// -----------------------------------------------------------------------------
+// Notifications & audit
+// -----------------------------------------------------------------------------
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  channel   NotificationChannel @default(IN_APP)
+  link      String?
+  read      Boolean             @default(false)
+  createdAt DateTime            @default(now())
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  actorUsername String?
+  action        String
+  entityType    String?
+  entityId      String?
+  metadata      String?
+  ip            String?
+  userAgent     String?
+  success       Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
