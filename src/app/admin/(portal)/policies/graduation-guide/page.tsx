@@ -32,7 +32,7 @@ export default async function GraduationGuidePage() {
         {quotas.length === 0 ? (
           <p className="text-sm text-muted">لا توجد حصص محددة بعد لهذه الفترة.</p>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full border-separate border-spacing-x-2 text-sm">
             <thead>
               <tr className="border-b border-border text-right text-muted">
                 <th className="pb-2">المستوى</th>

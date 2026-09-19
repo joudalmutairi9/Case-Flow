@@ -23,7 +23,7 @@ export default async function AdminTodayPage() {
         <p className="text-sm text-muted">{start.toLocaleDateString("ar-SA", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
       </div>
       <Card title={`المواعيد (${appointments.length})`}>
-        <table className="w-full text-sm">
+        <table className="w-full border-separate border-spacing-x-2 text-sm">
           <thead>
             <tr className="border-b border-border text-right text-muted">
               <th className="pb-2">الوقت</th>

@@ -82,7 +82,7 @@ export default async function AdminCaseBankPage({
 
       <Card title={`النتائج (${cases.length})`}>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full border-separate border-spacing-x-2 text-sm">
             <thead>
               <tr className="border-b border-border text-right text-muted">
                 <th className="pb-2">رقم الحالة</th>

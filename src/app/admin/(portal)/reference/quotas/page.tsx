@@ -30,7 +30,7 @@ export default async function QuotasPage() {
       </Card>
 
       <Card title="الفترات الأكاديمية">
-        <table className="w-full text-sm">
+        <table className="w-full border-separate border-spacing-x-2 text-sm">
           <thead>
             <tr className="border-b border-border text-right text-muted">
               <th className="pb-2">الاسم</th>
@@ -72,7 +72,7 @@ export default async function QuotasPage() {
       </Card>
 
       <Card title={`الحصص المحددة (${quotas.length})`}>
-        <table className="w-full text-sm">
+        <table className="w-full border-separate border-spacing-x-2 text-sm">
           <thead>
             <tr className="border-b border-border text-right text-muted">
               <th className="pb-2">المستوى</th>

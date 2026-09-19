@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { KpiCard } from "@/components/ui/Kpi";
+import { DonutChart } from "@/components/ui/DonutChart";
 import { currentWeekRange } from "@/lib/week";
 import { getSession } from "@/lib/session";
 
@@ -11,6 +12,7 @@ export default async function AdminDashboardPage() {
 
   const [
     totalCases,
+    takenCases,
     transferredPatients,
     totalPatients,
     completedServices,
@@ -25,6 +27,7 @@ export default async function AdminDashboardPage() {
     recentLogins,
   ] = await Promise.all([
     prisma.clinicalCase.count(),
+    prisma.clinicalCase.count({ where: { studentId: { not: null } } }),
     prisma.patient.count({ where: { cases: { some: {} } } }),
     prisma.patient.count(),
     prisma.clinicalCase.count({ where: { status: "COMPLETED" } }),
@@ -49,16 +52,15 @@ export default async function AdminDashboardPage() {
     }),
   ]);
 
+  const remainingCases = totalCases - takenCases;
+
   return (
     <div className="flex flex-col gap-6">
       <div className="rounded-2xl bg-primary p-6 text-primary-foreground">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold">مرحباً، {session!.fullName}</h1>
-            <p className="mt-1 text-sm text-white/80">
-              نظرة عامة على المنصة — الفترة: {start.toLocaleDateString("ar-SA")} إلى{" "}
-              {new Date(end.getTime() - 86400000).toLocaleDateString("ar-SA")}
-            </p>
+            <p className="mt-1 text-sm text-white/80">نظرة عامة على المنصة</p>
           </div>
           <Link
             href="/admin/reports"
@@ -75,6 +77,16 @@ export default async function AdminDashboardPage() {
         <KpiCard label="إجمالي المرضى" value={totalPatients} />
         <KpiCard label="إجمالي الخدمات المنجزة" value={completedServices} tone="success" />
       </div>
+
+      <Card title="توزيع الحالات — المأخوذة مقابل المتبقية">
+        <DonutChart
+          centerLabel="إجمالي الحالات النازلة"
+          segments={[
+            { label: "أُخذت (حجزها طالب)", value: takenCases, color: "#1baf7a" },
+            { label: "متبقية لم تُؤخذ بعد", value: remainingCases, color: "#eda100" },
+          ]}
+        />
+      </Card>
 
       <Card title="إجمالي الحالات حسب الخدمة">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -107,7 +119,7 @@ export default async function AdminDashboardPage() {
 
       <Card title="آخر عمليات الدخول">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full border-separate border-spacing-x-2 text-sm">
             <thead>
               <tr className="border-b border-border text-right text-muted">
                 <th className="pb-2">المستخدم</th>
