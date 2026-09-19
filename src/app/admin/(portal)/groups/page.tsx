@@ -3,12 +3,14 @@ import { Card } from "@/components/ui/Card";
 import { CreateGroupForm, AssignStudentForm, AssignInternForm } from "@/components/admin/GroupForms";
 
 export default async function GroupsPage() {
-  const [supervisors, students, interns, groups] = await Promise.all([
-    prisma.user.findMany({ where: { role: "SUPERVISOR" }, select: { id: true, fullName: true } }),
+  const [supervisorProfiles, students, interns, groups] = await Promise.all([
+    prisma.supervisorProfile.findMany({ include: { user: true } }),
     prisma.studentProfile.findMany({ include: { user: true, group: true } }),
     prisma.internProfile.findMany({ include: { user: true, group: true } }),
     prisma.supervisionGroup.findMany({ include: { supervisor: { include: { user: true } } } }),
   ]);
+  // createSupervisionGroupAction expects SupervisorProfile.id, not User.id.
+  const supervisors = supervisorProfiles.map((sp) => ({ id: sp.id, fullName: sp.user.fullName }));
 
   return (
     <div className="flex flex-col gap-6">

@@ -18,9 +18,14 @@ export async function createSupervisionGroupAction(
     return { error: "اسم المجموعة والمشرف إلزاميان." };
   }
 
-  const group = await prisma.supervisionGroup.create({
-    data: { name, supervisorId },
-  });
+  let group;
+  try {
+    group = await prisma.supervisionGroup.create({
+      data: { name, supervisorId },
+    });
+  } catch {
+    return { error: "تعذر إنشاء المجموعة. تأكد من اختيار مشرف صالح." };
+  }
   await writeAuditLog({
     userId: admin.userId,
     action: "SUPERVISION_GROUP_CREATED",
