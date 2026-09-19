@@ -22,8 +22,10 @@ export default async function SpecialtiesPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-bold text-card-foreground">التخصصات والإجراءات</h1>
-        <p className="text-sm text-muted">البيانات المرجعية التي يستخدمها طبيب الامتياز عند إنشاء الحالات</p>
+        <h1 className="text-xl font-bold text-card-foreground">توزيع الحالات السريرية — التخصصات والخدمات</h1>
+        <p className="text-sm text-muted">
+          كل الخدمات السريرية المتاحة لطبيب الامتياز عند إنشاء حالة، مع خيار إضافة خدمة جديدة في أي وقت
+        </p>
       </div>
 
       <Card title="إضافة تخصص">

@@ -13,12 +13,20 @@ export function PortalShell({
   session,
   nav,
   children,
+  searchAction,
+  quickLinks,
+  footer,
 }: {
   portal: PortalKey;
   portalName: string;
   session: SessionPayload;
   nav: NavItem[];
   children: ReactNode;
+  /** Path (relative to the portal) a top search box GETs to, e.g. "search". */
+  searchAction?: string;
+  /** Small icon links shown next to the search box (notifications, today...). */
+  quickLinks?: { href: string; label: string; icon: ReactNode }[];
+  footer?: ReactNode;
 }) {
   return (
     <div className="flex min-h-screen w-full">
@@ -45,14 +53,36 @@ export function PortalShell({
       </aside>
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 sm:px-6">
-          <div className="text-sm text-muted md:hidden">{portalName}</div>
-          <div className="hidden text-sm text-muted md:block">
-            مرحباً، <span className="font-bold text-card-foreground">{session.fullName}</span>
-            <span className="mx-2 text-border">|</span>
-            {ROLE_LABEL_AR[session.role]}
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 sm:px-6">
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-muted md:hidden">{portalName}</div>
+            {searchAction && (
+              <form action={`/${portal}/${searchAction}`} method="get" className="hidden sm:block">
+                <input
+                  name="q"
+                  placeholder="بحث بالاسم أو رقم الملف أو رقم الحالة..."
+                  className="w-64 rounded-lg border border-border bg-page-bg px-3 py-1.5 text-sm outline-none focus:border-primary lg:w-80"
+                />
+              </form>
+            )}
           </div>
+
           <div className="flex items-center gap-3">
+            {quickLinks?.map((q) => (
+              <Link
+                key={q.href}
+                href={`/${portal}/${q.href}`}
+                title={q.label}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition hover:bg-page-bg hover:text-primary"
+              >
+                {q.icon}
+              </Link>
+            ))}
+            <div className="hidden text-sm text-muted md:block">
+              <span className="font-bold text-card-foreground">{session.fullName}</span>
+              <span className="mx-2 text-border">|</span>
+              {ROLE_LABEL_AR[session.role]}
+            </div>
             <Link
               href={`/${portal}/change-password`}
               className="hidden text-sm text-muted hover:text-primary sm:inline"
@@ -63,6 +93,7 @@ export function PortalShell({
           </div>
         </header>
         <main className="flex-1 bg-page-bg p-4 sm:p-6">{children}</main>
+        {footer}
       </div>
     </div>
   );

@@ -6,10 +6,29 @@ import { BulkImportForm } from "@/components/admin/BulkImportForm";
 import { ResetPasswordButton } from "@/components/admin/ResetPasswordButton";
 import { toggleUserStatusAction, unlockUserAction } from "@/lib/actions/users";
 import { ROLE_LABEL_AR } from "@/lib/portals";
+import Link from "next/link";
+import type { Role } from "@prisma/client";
 
-export default async function AdminUsersPage() {
+const ROLE_TABS: { key: Role | "ALL"; label: string }[] = [
+  { key: "ALL", label: "الكل" },
+  { key: "STUDENT", label: "الطلاب" },
+  { key: "INTERN", label: "أطباء الامتياز" },
+  { key: "SUPERVISOR", label: "المشرفون" },
+  { key: "RECORDS", label: "السجلات" },
+  { key: "SUPER_ADMIN", label: "السوبر أدمن" },
+];
+
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ role?: string }>;
+}) {
+  const { role } = await searchParams;
+  const activeRole = (ROLE_TABS.find((r) => r.key === role)?.key ?? "ALL") as Role | "ALL";
+
   const [users, specialties] = await Promise.all([
     prisma.user.findMany({
+      where: activeRole === "ALL" ? {} : { role: activeRole },
       orderBy: { createdAt: "desc" },
       include: { studentProfile: true, internProfile: true, supervisorProfile: true },
     }),
@@ -24,14 +43,36 @@ export default async function AdminUsersPage() {
       </div>
 
       <Card title="إنشاء حساب جديد">
-        <CreateUserForm specialties={specialties} />
+        <CreateUserForm
+          specialties={specialties}
+          defaultRole={activeRole === "ALL" ? "STUDENT" : activeRole}
+        />
       </Card>
 
       <Card title="استيراد جماعي (Excel)">
         <BulkImportForm />
       </Card>
 
-      <Card title={`كل المستخدمين (${users.length})`}>
+      <Card
+        title={`كل المستخدمين (${users.length})`}
+        action={
+          <div className="flex flex-wrap gap-2">
+            {ROLE_TABS.map((t) => (
+              <Link
+                key={t.key}
+                href={t.key === "ALL" ? "/admin/users" : `/admin/users?role=${t.key}`}
+                className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  activeRole === t.key
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-page-bg text-muted hover:text-primary"
+                }`}
+              >
+                {t.label}
+              </Link>
+            ))}
+          </div>
+        }
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

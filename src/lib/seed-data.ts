@@ -1,4 +1,3 @@
-import "server-only";
 import type { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 

@@ -1,27 +1,47 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { KpiCard } from "@/components/ui/Kpi";
+import { currentWeekRange } from "@/lib/week";
+import { getSession } from "@/lib/session";
 
 export default async function AdminDashboardPage() {
+  const session = await getSession();
+  const { start, end } = currentWeekRange();
+
   const [
-    activeByRole,
+    totalCases,
+    transferredPatients,
+    totalPatients,
+    completedServices,
+    specialties,
+    studentsCount,
+    internsCount,
+    supervisorsCount,
     lockedCount,
-    casesInBank,
-    casesBooked,
-    casesCompleted,
+    weekCreated,
+    weekBooked,
+    weekCompleted,
     recentLogins,
   ] = await Promise.all([
-    prisma.user.groupBy({
-      by: ["role"],
-      where: { status: "ACTIVE" },
-      _count: { _all: true },
-    }),
-    prisma.user.count({ where: { lockedUntil: { gt: new Date() } } }),
-    prisma.clinicalCase.count({ where: { status: "IN_BANK" } }),
-    prisma.clinicalCase.count({
-      where: { status: { in: ["BOOKED", "SCHEDULED", "IN_TREATMENT"] } },
-    }),
+    prisma.clinicalCase.count(),
+    prisma.patient.count({ where: { cases: { some: {} } } }),
+    prisma.patient.count(),
     prisma.clinicalCase.count({ where: { status: "COMPLETED" } }),
+    prisma.specialty.findMany({
+      where: { isActive: true },
+      include: { _count: { select: { cases: true } } },
+      orderBy: { nameAr: "asc" },
+    }),
+    prisma.studentProfile.count(),
+    prisma.internProfile.count(),
+    prisma.supervisorProfile.count(),
+    prisma.user.count({ where: { lockedUntil: { gt: new Date() } } }),
+    prisma.clinicalCase.count({ where: { createdAt: { gte: start, lt: end } } }),
+    prisma.clinicalCase.count({ where: { bookedAt: { gte: start, lt: end } } }),
+    prisma.clinicalCase.count({
+      where: { status: "COMPLETED", updatedAt: { gte: start, lt: end } },
+    }),
     prisma.auditLog.findMany({
       where: { action: { in: ["LOGIN_SUCCESS", "LOGIN_FAILED"] } },
       orderBy: { createdAt: "desc" },
@@ -29,28 +49,60 @@ export default async function AdminDashboardPage() {
     }),
   ]);
 
-  const roleCount = (role: string) =>
-    activeByRole.find((r) => r.role === role)?._count._all ?? 0;
-
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-bold text-card-foreground">لوحة السوبر أدمن</h1>
-        <p className="text-sm text-muted">نظرة عامة على المستخدمين النشطين وحالة الحالات السريرية</p>
+      <div className="rounded-2xl bg-primary p-6 text-primary-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold">مرحباً، {session!.fullName}</h1>
+            <p className="mt-1 text-sm text-white/80">
+              نظرة عامة على المنصة — الفترة: {start.toLocaleDateString("ar-SA")} إلى{" "}
+              {new Date(end.getTime() - 86400000).toLocaleDateString("ar-SA")}
+            </p>
+          </div>
+          <Link
+            href="/admin/reports"
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-foreground"
+          >
+            مركز التقارير
+          </Link>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        <KpiCard label="الطلاب النشطون" value={roleCount("STUDENT")} />
-        <KpiCard label="أطباء الامتياز" value={roleCount("INTERN")} />
-        <KpiCard label="المشرفون" value={roleCount("SUPERVISOR")} />
-        <KpiCard label="موظفو السجلات" value={roleCount("RECORDS")} />
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <KpiCard label="إجمالي الحالات (أطباء الامتياز)" value={totalCases} />
+        <KpiCard label="إجمالي الحالات المحوّلة" value={transferredPatients} />
+        <KpiCard label="إجمالي المرضى" value={totalPatients} />
+        <KpiCard label="إجمالي الخدمات المنجزة" value={completedServices} tone="success" />
+      </div>
+
+      <Card title="إجمالي الحالات حسب الخدمة">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {specialties.map((s) => (
+            <div key={s.id} className="rounded-xl border border-border p-3 text-center">
+              <p className="text-2xl font-bold text-primary">{s._count.cases}</p>
+              <p className="text-xs text-muted">إجمالي خدمة {s.nameAr}</p>
+            </div>
+          ))}
+          {specialties.length === 0 && (
+            <p className="col-span-full text-sm text-muted">لا توجد تخصصات نشطة بعد.</p>
+          )}
+        </div>
+      </Card>
+
+      <Card title="الملخص الأسبوعي للحالات">
+        <div className="grid grid-cols-3 gap-4">
+          <KpiCard label="حالات نزلت هذا الأسبوع" value={weekCreated} />
+          <KpiCard label="حالات أُخذت هذا الأسبوع" value={weekBooked} tone="warning" />
+          <KpiCard label="حالات أُنجزت هذا الأسبوع" value={weekCompleted} tone="success" />
+        </div>
+      </Card>
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <KpiCard label="عدد الطلاب" value={studentsCount} />
+        <KpiCard label="عدد أطباء الامتياز" value={internsCount} />
+        <KpiCard label="عدد المشرفين" value={supervisorsCount} />
         <KpiCard label="حسابات مقفلة" value={lockedCount} tone={lockedCount > 0 ? "danger" : "default"} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <KpiCard label="حالات في البنك" value={casesInBank} tone="warning" />
-        <KpiCard label="حالات محجوزة/قيد العلاج" value={casesBooked} />
-        <KpiCard label="حالات مكتملة" value={casesCompleted} tone="success" />
       </div>
 
       <Card title="آخر عمليات الدخول">

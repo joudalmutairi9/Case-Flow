@@ -10,11 +10,13 @@ const ROLES: Role[] = ["STUDENT", "INTERN", "SUPERVISOR", "RECORDS", "SUPER_ADMI
 
 export function CreateUserForm({
   specialties,
+  defaultRole = "STUDENT",
 }: {
   specialties: { id: string; nameAr: string }[];
+  defaultRole?: Role;
 }) {
   const [state, formAction] = useActionState(createUserAction, {});
-  const [role, setRole] = useState<Role>("STUDENT");
+  const [role, setRole] = useState<Role>(defaultRole);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
