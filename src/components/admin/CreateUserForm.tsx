@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { createUserAction } from "@/lib/actions/users";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { ROLE_LABEL_AR } from "@/lib/portals";
+import { STUDENT_LEVELS } from "@/lib/levels";
 import type { Role } from "@prisma/client";
 
 const ROLES: Role[] = ["STUDENT", "INTERN", "SUPERVISOR", "RECORDS", "SUPER_ADMIN"];
@@ -57,7 +58,21 @@ export function CreateUserForm({
               <input name="studentNumber" required className="rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
             </Field>
             <Field label="المستوى الدراسي">
-              <input name="level" required placeholder="مثال: BDS4" className="rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+              <select
+                name="level"
+                required
+                defaultValue=""
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="" disabled>
+                  — اختر —
+                </option>
+                {STUDENT_LEVELS.map((lvl) => (
+                  <option key={lvl} value={lvl}>
+                    {lvl}
+                  </option>
+                ))}
+              </select>
             </Field>
           </>
         )}

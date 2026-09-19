@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/guard";
 import { hashPassword, generateTemporaryPassword } from "@/lib/password";
 import { writeAuditLog } from "@/lib/audit";
+import { isForeignKeyError } from "@/lib/prisma-errors";
 import type { Role } from "@prisma/client";
 import type { ActionState } from "./auth";
 
@@ -101,6 +102,50 @@ export async function toggleUserStatusAction(userId: string, disable: boolean) {
     entityId: userId,
   });
   revalidatePath("/admin/users");
+}
+
+export async function deleteUserAction(userId: string): Promise<ActionState> {
+  const admin = await requireRole("SUPER_ADMIN");
+
+  if (userId === admin.userId) {
+    return { error: "لا يمكنك حذف حسابك الخاص." };
+  }
+
+  const target = await prisma.user.findUnique({ where: { id: userId } });
+  if (!target) return { error: "الحساب غير موجود." };
+
+  if (target.role === "SUPER_ADMIN") {
+    const otherAdmins = await prisma.user.count({
+      where: { role: "SUPER_ADMIN", id: { not: userId } },
+    });
+    if (otherAdmins === 0) {
+      return { error: "لا يمكن حذف آخر حساب سوبر أدمن." };
+    }
+  }
+
+  try {
+    await prisma.user.delete({ where: { id: userId } });
+  } catch (e) {
+    if (isForeignKeyError(e)) {
+      return {
+        error: "لا يمكن حذف هذا الحساب لأنه مرتبط بحالات سريرية أو مرضى سابقين. عطّله بدلاً من الحذف.",
+      };
+    }
+    throw e;
+  }
+
+  await writeAuditLog({
+    userId: admin.userId,
+    action: "USER_DELETED",
+    entityType: "User",
+    entityId: userId,
+    metadata: { username: target.username, role: target.role },
+  });
+
+  revalidatePath("/admin/users");
+  revalidatePath("/admin/students");
+  revalidatePath("/admin/interns");
+  return { ok: true };
 }
 
 export async function unlockUserAction(userId: string) {

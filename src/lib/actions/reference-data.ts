@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/guard";
 import { writeAuditLog } from "@/lib/audit";
+import { isForeignKeyError } from "@/lib/prisma-errors";
 import type { Difficulty, ClinicType } from "@prisma/client";
 import type { ActionState } from "./auth";
 
@@ -43,6 +44,21 @@ export async function toggleSpecialtyAction(id: string, isActive: boolean) {
   revalidatePath("/admin/reference/specialties");
 }
 
+export async function deleteSpecialtyAction(id: string): Promise<ActionState> {
+  const admin = await requireRole("SUPER_ADMIN");
+  try {
+    await prisma.specialty.delete({ where: { id } });
+  } catch (e) {
+    if (isForeignKeyError(e)) {
+      return { error: "لا يمكن حذف هذا التخصص لأنه مستخدم في حالات أو حصص أو حسابات مشرفين. عطّله بدلاً من ذلك." };
+    }
+    throw e;
+  }
+  await writeAuditLog({ userId: admin.userId, action: "SPECIALTY_DELETED", entityType: "Specialty", entityId: id });
+  revalidatePath("/admin/reference/specialties");
+  return { ok: true };
+}
+
 // ---- Procedures ----
 
 export async function createProcedureAction(
@@ -78,6 +94,21 @@ export async function toggleProcedureAction(id: string, isActive: boolean) {
   revalidatePath("/admin/reference/specialties");
 }
 
+export async function deleteProcedureAction(id: string): Promise<ActionState> {
+  const admin = await requireRole("SUPER_ADMIN");
+  try {
+    await prisma.procedure.delete({ where: { id } });
+  } catch (e) {
+    if (isForeignKeyError(e)) {
+      return { error: "لا يمكن حذف هذه الخدمة لأنها مستخدمة في حالات موجودة. عطّلها بدلاً من ذلك." };
+    }
+    throw e;
+  }
+  await writeAuditLog({ userId: admin.userId, action: "PROCEDURE_DELETED", entityType: "Procedure", entityId: id });
+  revalidatePath("/admin/reference/specialties");
+  return { ok: true };
+}
+
 // ---- Clinics ----
 
 export async function createClinicAction(
@@ -105,6 +136,21 @@ export async function toggleClinicAction(id: string, isActive: boolean) {
   await requireRole("SUPER_ADMIN");
   await prisma.clinic.update({ where: { id }, data: { isActive } });
   revalidatePath("/admin/reference/clinics");
+}
+
+export async function deleteClinicAction(id: string): Promise<ActionState> {
+  const admin = await requireRole("SUPER_ADMIN");
+  try {
+    await prisma.clinic.delete({ where: { id } });
+  } catch (e) {
+    if (isForeignKeyError(e)) {
+      return { error: "لا يمكن حذف هذه العيادة لوجود مواعيد أو فترات مرتبطة بها. عطّلها بدلاً من ذلك." };
+    }
+    throw e;
+  }
+  await writeAuditLog({ userId: admin.userId, action: "CLINIC_DELETED", entityType: "Clinic", entityId: id });
+  revalidatePath("/admin/reference/clinics");
+  return { ok: true };
 }
 
 // ---- Academic periods & quotas ----

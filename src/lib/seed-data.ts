@@ -165,14 +165,14 @@ export async function seedDatabase(prisma: PrismaClient) {
     await prisma.graduationQuota.upsert({
       where: {
         level_specialtyId_academicTermId: {
-          level: "BDS4",
+          level: "DCP4",
           specialtyId: specialties.get(code)!,
           academicTermId: period.id,
         },
       },
       update: { requiredCount },
       create: {
-        level: "BDS4",
+        level: "DCP4",
         specialtyId: specialties.get(code)!,
         academicTermId: period.id,
         requiredCount,
@@ -194,7 +194,7 @@ export async function seedDatabase(prisma: PrismaClient) {
   await prisma.studentProfile.upsert({
     where: { userId: studentUser.id },
     update: {},
-    create: { userId: studentUser.id, studentNumber: "443012345", level: "BDS4", academicTermId: period.id },
+    create: { userId: studentUser.id, studentNumber: "443012345", level: "DCP4", academicTermId: period.id },
   });
 
   return DEMO_CREDENTIALS;

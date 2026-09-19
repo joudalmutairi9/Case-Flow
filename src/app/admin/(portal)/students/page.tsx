@@ -2,8 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Card, Badge } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/ui/SubmitButton";
-import { toggleUserStatusAction, unlockUserAction } from "@/lib/actions/users";
+import { toggleUserStatusAction, unlockUserAction, deleteUserAction } from "@/lib/actions/users";
 import { PromoteStudentForm } from "@/components/admin/PromoteStudentForm";
+import { DeleteButton } from "@/components/admin/DeleteButton";
 import { getStudentProgress } from "@/lib/progress";
 
 export default async function StudentsPage() {
@@ -102,6 +103,10 @@ export default async function StudentsPage() {
                             </SubmitButton>
                           </form>
                         )}
+                        <DeleteButton
+                          action={deleteUserAction.bind(null, s.user.id)}
+                          confirmMessage={`تأكيد حذف حساب الطالب "${s.user.fullName}"؟ لا يمكن التراجع.`}
+                        />
                       </div>
                     </td>
                   </tr>

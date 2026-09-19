@@ -2,7 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Card, Badge } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/ui/SubmitButton";
-import { toggleUserStatusAction, unlockUserAction } from "@/lib/actions/users";
+import { toggleUserStatusAction, unlockUserAction, deleteUserAction } from "@/lib/actions/users";
+import { DeleteButton } from "@/components/admin/DeleteButton";
 
 export default async function InternsPage() {
   const interns = await prisma.internProfile.findMany({
@@ -72,6 +73,10 @@ export default async function InternsPage() {
                             </SubmitButton>
                           </form>
                         )}
+                        <DeleteButton
+                          action={deleteUserAction.bind(null, i.user.id)}
+                          confirmMessage={`تأكيد حذف حساب طبيب الامتياز "${i.user.fullName}"؟ لا يمكن التراجع.`}
+                        />
                       </div>
                     </td>
                   </tr>

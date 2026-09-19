@@ -4,7 +4,8 @@ import { SubmitButton } from "@/components/ui/SubmitButton";
 import { CreateUserForm } from "@/components/admin/CreateUserForm";
 import { BulkImportForm } from "@/components/admin/BulkImportForm";
 import { ResetPasswordButton } from "@/components/admin/ResetPasswordButton";
-import { toggleUserStatusAction, unlockUserAction } from "@/lib/actions/users";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { toggleUserStatusAction, unlockUserAction, deleteUserAction } from "@/lib/actions/users";
 import { ROLE_LABEL_AR } from "@/lib/portals";
 import Link from "next/link";
 import type { Role } from "@prisma/client";
@@ -127,6 +128,10 @@ export default async function AdminUsersPage({
                           </form>
                         )}
                         <ResetPasswordButton userId={user.id} />
+                        <DeleteButton
+                          action={deleteUserAction.bind(null, user.id)}
+                          confirmMessage={`تأكيد حذف حساب "${user.fullName}"؟ لا يمكن التراجع عن هذا الإجراء.`}
+                        />
                       </div>
                     </td>
                   </tr>

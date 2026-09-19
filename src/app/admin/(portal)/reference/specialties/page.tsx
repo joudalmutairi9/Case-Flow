@@ -6,6 +6,8 @@ import {
   CreateProcedureForm,
   ToggleProcedureButton,
 } from "@/components/admin/ReferenceForms";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { deleteSpecialtyAction, deleteProcedureAction } from "@/lib/actions/reference-data";
 
 const DIFFICULTY_LABEL: Record<string, string> = {
   SIMPLE: "بسيط",
@@ -44,6 +46,10 @@ export default async function SpecialtiesPage() {
             <div className="flex items-center gap-2">
               {specialty.isActive ? <Badge tone="success">مفعّل</Badge> : <Badge tone="warning">معطّل</Badge>}
               <ToggleSpecialtyButton id={specialty.id} isActive={specialty.isActive} />
+              <DeleteButton
+                action={deleteSpecialtyAction.bind(null, specialty.id)}
+                confirmMessage={`تأكيد حذف تخصص "${specialty.nameAr}"؟`}
+              />
             </div>
           }
         >
@@ -67,7 +73,13 @@ export default async function SpecialtiesPage() {
                     {proc.isActive ? <Badge tone="success">مفعّل</Badge> : <Badge tone="warning">معطّل</Badge>}
                   </td>
                   <td className="py-2">
-                    <ToggleProcedureButton id={proc.id} isActive={proc.isActive} />
+                    <div className="flex items-center gap-2">
+                      <ToggleProcedureButton id={proc.id} isActive={proc.isActive} />
+                      <DeleteButton
+                        action={deleteProcedureAction.bind(null, proc.id)}
+                        confirmMessage={`تأكيد حذف خدمة "${proc.nameAr}"؟`}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}

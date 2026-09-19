@@ -13,6 +13,7 @@ import {
   upsertQuotaAction,
 } from "@/lib/actions/reference-data";
 import type { ActionState } from "@/lib/actions/auth";
+import { STUDENT_LEVELS } from "@/lib/levels";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 
 const inputCls =
@@ -182,7 +183,16 @@ export function UpsertQuotaForm({
     <form action={formAction} className="flex flex-wrap items-end gap-3">
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">المستوى الدراسي</span>
-        <input name="level" required placeholder="BDS4" className={inputCls} />
+        <select name="level" required defaultValue="" className={inputCls}>
+          <option value="" disabled>
+            — اختر —
+          </option>
+          {STUDENT_LEVELS.map((lvl) => (
+            <option key={lvl} value={lvl}>
+              {lvl}
+            </option>
+          ))}
+        </select>
       </label>
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">التخصص</span>
