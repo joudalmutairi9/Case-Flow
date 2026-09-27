@@ -15,6 +15,9 @@ import {
 import type { ActionState } from "@/lib/actions/auth";
 import { STUDENT_LEVELS } from "@/lib/levels";
 import { SubmitButton } from "@/components/ui/SubmitButton";
+import { IconActionButton } from "@/components/ui/IconActionButton";
+import { PowerIcon } from "@/components/ui/Icons";
+import { ToggleStatusButton } from "@/components/admin/ToggleStatusButton";
 
 const inputCls =
   "rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
@@ -49,11 +52,10 @@ export function CreateSpecialtyForm() {
 
 export function ToggleSpecialtyButton({ id, isActive }: { id: string; isActive: boolean }) {
   return (
-    <form action={toggleSpecialtyAction.bind(null, id, !isActive)}>
-      <SubmitButton variant="ghost" className="text-xs">
-        {isActive ? "تعطيل" : "تفعيل"}
-      </SubmitButton>
-    </form>
+    <ToggleStatusButton
+      action={toggleSpecialtyAction.bind(null, id, !isActive)}
+      active={isActive}
+    />
   );
 }
 
@@ -99,11 +101,10 @@ export function CreateProcedureForm({
 
 export function ToggleProcedureButton({ id, isActive }: { id: string; isActive: boolean }) {
   return (
-    <form action={toggleProcedureAction.bind(null, id, !isActive)}>
-      <SubmitButton variant="ghost" className="text-xs">
-        {isActive ? "تعطيل" : "تفعيل"}
-      </SubmitButton>
-    </form>
+    <ToggleStatusButton
+      action={toggleProcedureAction.bind(null, id, !isActive)}
+      active={isActive}
+    />
   );
 }
 
@@ -130,11 +131,10 @@ export function CreateClinicForm() {
 
 export function ToggleClinicButton({ id, isActive }: { id: string; isActive: boolean }) {
   return (
-    <form action={toggleClinicAction.bind(null, id, !isActive)}>
-      <SubmitButton variant="ghost" className="text-xs">
-        {isActive ? "تعطيل" : "تفعيل"}
-      </SubmitButton>
-    </form>
+    <ToggleStatusButton
+      action={toggleClinicAction.bind(null, id, !isActive)}
+      active={isActive}
+    />
   );
 }
 
@@ -164,9 +164,7 @@ export function SetActivePeriodButton({ id, isActive }: { id: string; isActive: 
   if (isActive) return <span className="text-xs text-success">الفترة النشطة</span>;
   return (
     <form action={setActivePeriodAction.bind(null, id)}>
-      <SubmitButton variant="ghost" className="text-xs">
-        تفعيل هذه الفترة
-      </SubmitButton>
+      <IconActionButton tone="primary" label="تفعيل هذه الفترة" icon={<PowerIcon size={16} />} />
     </form>
   );
 }

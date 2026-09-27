@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Card, Badge } from "@/components/ui/Card";
-import { SubmitButton } from "@/components/ui/SubmitButton";
 import { toggleUserStatusAction, unlockUserAction, deleteUserAction } from "@/lib/actions/users";
 import { PromoteStudentForm } from "@/components/admin/PromoteStudentForm";
 import { DeleteButton } from "@/components/admin/DeleteButton";
+import { ToggleStatusButton, UnlockButton } from "@/components/admin/ToggleStatusButton";
 import { getStudentProgress } from "@/lib/progress";
 
 export default async function StudentsPage() {
@@ -90,19 +90,12 @@ export default async function StudentsPage() {
                       )}
                     </td>
                     <td className="py-2.5">
-                      <div className="flex flex-wrap gap-2">
-                        <form action={toggleUserStatusAction.bind(null, s.user.id, s.user.status === "ACTIVE")}>
-                          <SubmitButton variant="ghost" className="text-xs">
-                            {s.user.status === "ACTIVE" ? "تعطيل" : "تفعيل"}
-                          </SubmitButton>
-                        </form>
-                        {isLocked && (
-                          <form action={unlockUserAction.bind(null, s.user.id)}>
-                            <SubmitButton variant="ghost" className="text-xs">
-                              فتح القفل
-                            </SubmitButton>
-                          </form>
-                        )}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <ToggleStatusButton
+                          action={toggleUserStatusAction.bind(null, s.user.id, s.user.status === "ACTIVE")}
+                          active={s.user.status === "ACTIVE"}
+                        />
+                        {isLocked && <UnlockButton action={unlockUserAction.bind(null, s.user.id)} />}
                         <DeleteButton
                           action={deleteUserAction.bind(null, s.user.id)}
                           confirmMessage={`تأكيد حذف حساب الطالب "${s.user.fullName}"؟ لا يمكن التراجع.`}

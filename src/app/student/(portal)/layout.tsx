@@ -2,11 +2,12 @@ import { redirect } from "next/navigation";
 import { PortalShell, type NavItem } from "@/components/layout/PortalShell";
 import { getSession } from "@/lib/session";
 import { PORTALS } from "@/lib/portals";
+import { HomeIcon, BankIcon, ClipboardIcon } from "@/components/ui/Icons";
 
 const NAV: NavItem[] = [
-  { href: "dashboard", label: "الرئيسية" },
-  { href: "case-bank", label: "بنك الحالات" },
-  { href: "my-cases", label: "حالاتي" },
+  { href: "dashboard", label: "الرئيسية", icon: <HomeIcon size={16} /> },
+  { href: "case-bank", label: "بنك الحالات", icon: <BankIcon size={16} /> },
+  { href: "my-cases", label: "حالاتي", icon: <ClipboardIcon size={16} /> },
 ];
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {

@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { SubmitButton } from "@/components/ui/SubmitButton";
+import { IconActionButton } from "@/components/ui/IconActionButton";
+import { TrashIcon } from "@/components/ui/Icons";
 import type { ActionState } from "@/lib/actions/auth";
 
 export function DeleteButton({
@@ -23,9 +24,7 @@ export function DeleteButton({
           if (!window.confirm(confirmMessage)) e.preventDefault();
         }}
       >
-        <SubmitButton variant="danger" className="text-xs">
-          {label}
-        </SubmitButton>
+        <IconActionButton tone="danger" label={label} icon={<TrashIcon size={16} />} />
       </form>
       {state?.error && <span className="text-xs text-danger">{state.error}</span>}
     </div>

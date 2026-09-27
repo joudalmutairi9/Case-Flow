@@ -4,8 +4,9 @@ import { LogoutButton } from "./LogoutButton";
 import type { PortalKey } from "@/lib/portals";
 import { ROLE_LABEL_AR } from "@/lib/portals";
 import type { SessionPayload } from "@/lib/session";
+import { IconCircle, type IconTone } from "@/components/ui/IconCircle";
 
-export type NavItem = { href: string; label: string };
+export type NavItem = { href: string; label: string; icon?: ReactNode };
 
 export function PortalShell({
   portal,
@@ -25,7 +26,7 @@ export function PortalShell({
   /** Path (relative to the portal) a top search box GETs to, e.g. "search". */
   searchAction?: string;
   /** Small icon links shown next to the search box (notifications, today...). */
-  quickLinks?: { href: string; label: string; icon: ReactNode }[];
+  quickLinks?: { href: string; label: string; icon: ReactNode; tone?: IconTone }[];
   footer?: ReactNode;
 }) {
   return (
@@ -44,8 +45,13 @@ export function PortalShell({
             <Link
               key={item.href}
               href={`/${portal}/${item.href}`}
-              className="rounded-lg px-3 py-2 text-sm text-white/85 transition hover:bg-white/10 hover:text-white"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-white/85 transition hover:bg-white/10 hover:text-white"
             >
+              {item.icon && (
+                <IconCircle tone="onDark" size={28}>
+                  {item.icon}
+                </IconCircle>
+              )}
               {item.label}
             </Link>
           ))}
@@ -69,13 +75,10 @@ export function PortalShell({
 
           <div className="flex items-center gap-3">
             {quickLinks?.map((q) => (
-              <Link
-                key={q.href}
-                href={`/${portal}/${q.href}`}
-                title={q.label}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition hover:bg-page-bg hover:text-primary"
-              >
-                {q.icon}
+              <Link key={q.href} href={`/${portal}/${q.href}`} title={q.label}>
+                <IconCircle tone={q.tone ?? "tertiary"} size={34}>
+                  {q.icon}
+                </IconCircle>
               </Link>
             ))}
             <div className="hidden text-sm text-muted md:block">

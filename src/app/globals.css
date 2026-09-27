@@ -5,6 +5,8 @@
   --color-primary-foreground: #ffffff;
   --color-accent: #856b32; /* ذهبي */
   --color-accent-foreground: #ffffff;
+  --color-tertiary: #1e5a4d; /* أخضر مسحي، لتنويع أيقونات الإجراءات */
+  --color-tertiary-foreground: #ffffff;
   --color-page-bg: #ebf6ee; /* نعناعي فاتح */
   --color-card: #ffffff;
   --color-card-foreground: #1a1a1a;
@@ -23,6 +25,8 @@
   --color-primary-foreground: var(--color-primary-foreground);
   --color-accent: var(--color-accent);
   --color-accent-foreground: var(--color-accent-foreground);
+  --color-tertiary: var(--color-tertiary);
+  --color-tertiary-foreground: var(--color-tertiary-foreground);
   --color-page-bg: var(--color-page-bg);
   --color-card: var(--color-card);
   --color-card-foreground: var(--color-card-foreground);

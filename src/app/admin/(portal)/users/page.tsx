@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { Card, Badge } from "@/components/ui/Card";
-import { SubmitButton } from "@/components/ui/SubmitButton";
 import { CreateUserForm } from "@/components/admin/CreateUserForm";
 import { BulkImportForm } from "@/components/admin/BulkImportForm";
 import { ResetPasswordButton } from "@/components/admin/ResetPasswordButton";
 import { DeleteButton } from "@/components/admin/DeleteButton";
+import { ToggleStatusButton, UnlockButton } from "@/components/admin/ToggleStatusButton";
 import { toggleUserStatusAction, unlockUserAction, deleteUserAction } from "@/lib/actions/users";
 import { ROLE_LABEL_AR } from "@/lib/portals";
 import Link from "next/link";
@@ -114,18 +114,13 @@ export default async function AdminUsersPage({
                       {user.lastLoginAt ? user.lastLoginAt.toLocaleString("ar-SA") : "—"}
                     </td>
                     <td className="py-2.5">
-                      <div className="flex flex-wrap gap-2">
-                        <form action={toggleUserStatusAction.bind(null, user.id, user.status === "ACTIVE")}>
-                          <SubmitButton variant="ghost" className="text-xs">
-                            {user.status === "ACTIVE" ? "تعطيل" : "تفعيل"}
-                          </SubmitButton>
-                        </form>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <ToggleStatusButton
+                          action={toggleUserStatusAction.bind(null, user.id, user.status === "ACTIVE")}
+                          active={user.status === "ACTIVE"}
+                        />
                         {isLocked && (
-                          <form action={unlockUserAction.bind(null, user.id)}>
-                            <SubmitButton variant="ghost" className="text-xs">
-                              فتح القفل
-                            </SubmitButton>
-                          </form>
+                          <UnlockButton action={unlockUserAction.bind(null, user.id)} />
                         )}
                         <ResetPasswordButton userId={user.id} />
                         <DeleteButton

@@ -3,21 +3,36 @@ import { redirect } from "next/navigation";
 import { PortalShell, type NavItem } from "@/components/layout/PortalShell";
 import { getSession } from "@/lib/session";
 import { PORTALS } from "@/lib/portals";
-import { BellIcon, CalendarIcon } from "@/components/ui/Icons";
+import {
+  BellIcon,
+  CalendarIcon,
+  HomeIcon,
+  UsersIcon,
+  GraduationCapIcon,
+  StethoscopeIcon,
+  TagIcon,
+  BankIcon,
+  ChartIcon,
+  BuildingIcon,
+  TeamIcon,
+  MessageIcon,
+  ClipboardIcon,
+  GearIcon,
+} from "@/components/ui/Icons";
 
 const NAV: NavItem[] = [
-  { href: "dashboard", label: "الرئيسية والإحصائيات" },
-  { href: "users", label: "إدارة المستخدمين" },
-  { href: "students", label: "بوابة الطلاب والمتطلبات" },
-  { href: "interns", label: "أطباء الامتياز" },
-  { href: "reference/specialties", label: "توزيع الحالات السريرية" },
-  { href: "case-bank", label: "بنك الحالات السريرية" },
-  { href: "reports", label: "مركز التقارير" },
-  { href: "reference/clinics", label: "العيادات" },
-  { href: "groups", label: "مجموعات الإشراف" },
-  { href: "notification-templates", label: "قوالب الإشعارات" },
-  { href: "audit-log", label: "سجل التدقيق" },
-  { href: "settings", label: "إعدادات النظام" },
+  { href: "dashboard", label: "الرئيسية والإحصائيات", icon: <HomeIcon size={16} /> },
+  { href: "users", label: "إدارة المستخدمين", icon: <UsersIcon size={16} /> },
+  { href: "students", label: "بوابة الطلاب والمتطلبات", icon: <GraduationCapIcon size={16} /> },
+  { href: "interns", label: "أطباء الامتياز", icon: <StethoscopeIcon size={16} /> },
+  { href: "reference/specialties", label: "توزيع الحالات السريرية", icon: <TagIcon size={16} /> },
+  { href: "case-bank", label: "بنك الحالات السريرية", icon: <BankIcon size={16} /> },
+  { href: "reports", label: "مركز التقارير", icon: <ChartIcon size={16} /> },
+  { href: "reference/clinics", label: "العيادات", icon: <BuildingIcon size={16} /> },
+  { href: "groups", label: "مجموعات الإشراف", icon: <TeamIcon size={16} /> },
+  { href: "notification-templates", label: "قوالب الإشعارات", icon: <MessageIcon size={16} /> },
+  { href: "audit-log", label: "سجل التدقيق", icon: <ClipboardIcon size={16} /> },
+  { href: "settings", label: "إعدادات النظام", icon: <GearIcon size={16} /> },
 ];
 
 function AdminFooter() {
@@ -52,8 +67,8 @@ export default async function AdminLayout({
       nav={NAV}
       searchAction="search"
       quickLinks={[
-        { href: "notifications", label: "الإشعارات", icon: <BellIcon /> },
-        { href: "today", label: "مواعيد اليوم", icon: <CalendarIcon /> },
+        { href: "notifications", label: "الإشعارات", icon: <BellIcon size={17} />, tone: "accent" },
+        { href: "today", label: "مواعيد اليوم", icon: <CalendarIcon size={17} />, tone: "tertiary" },
       ]}
       footer={<AdminFooter />}
     >

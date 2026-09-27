@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 import { resetUserPasswordAction } from "@/lib/actions/users";
-import { SubmitButton } from "@/components/ui/SubmitButton";
+import { IconActionButton } from "@/components/ui/IconActionButton";
+import { KeyIcon } from "@/components/ui/Icons";
 
 export function ResetPasswordButton({ userId }: { userId: string }) {
   const [state, formAction] = useActionState<
@@ -13,9 +14,7 @@ export function ResetPasswordButton({ userId }: { userId: string }) {
   return (
     <div className="flex flex-col items-start gap-1">
       <form action={formAction}>
-        <SubmitButton variant="ghost" className="text-xs">
-          إعادة تعيين كلمة المرور
-        </SubmitButton>
+        <IconActionButton tone="tertiary" label="إعادة تعيين كلمة المرور" icon={<KeyIcon size={16} />} />
       </form>
       {state?.tempPassword && (
         <span className="rounded bg-success-bg px-2 py-1 text-xs text-success" dir="ltr">
