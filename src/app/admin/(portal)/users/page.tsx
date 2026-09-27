@@ -79,7 +79,6 @@ export default async function AdminUsersPage({
             <thead>
               <tr className="border-b border-border text-right text-muted">
                 <th className="pb-2">الاسم</th>
-                <th className="pb-2">اسم المستخدم</th>
                 <th className="pb-2">الدور</th>
                 <th className="pb-2">الحالة</th>
                 <th className="pb-2">آخر دخول</th>
@@ -92,13 +91,17 @@ export default async function AdminUsersPage({
                 return (
                   <tr key={user.id} className="border-b border-border align-top last:border-0">
                     <td className="py-2.5">
-                      {user.fullName}
-                      {user.mustChangePassword && (
-                        <span className="mr-2 text-xs text-warning">(بانتظار تغيير كلمة المرور)</span>
-                      )}
-                    </td>
-                    <td className="py-2.5" dir="ltr">
-                      {user.username}
+                      <div className="flex flex-col gap-0.5">
+                        <span>
+                          {user.fullName}
+                          {user.mustChangePassword && (
+                            <span className="mr-2 text-xs text-warning">(بانتظار تغيير كلمة المرور)</span>
+                          )}
+                        </span>
+                        <span className="text-xs text-muted" dir="ltr">
+                          {user.username}
+                        </span>
+                      </div>
                     </td>
                     <td className="py-2.5">{ROLE_LABEL_AR[user.role]}</td>
                     <td className="py-2.5">

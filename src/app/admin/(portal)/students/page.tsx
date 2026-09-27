@@ -48,7 +48,6 @@ export default async function StudentsPage() {
             <thead>
               <tr className="border-b border-border text-right text-muted">
                 <th className="pb-2">الاسم</th>
-                <th className="pb-2">الرقم الجامعي</th>
                 <th className="pb-2">المستوى</th>
                 <th className="pb-2">المجموعة</th>
                 <th className="pb-2">تقدم المتطلبات</th>
@@ -61,8 +60,12 @@ export default async function StudentsPage() {
                 const isLocked = s.user.lockedUntil && s.user.lockedUntil > new Date();
                 return (
                   <tr key={s.id} className="border-b border-border align-top last:border-0">
-                    <td className="py-2.5">{s.user.fullName}</td>
-                    <td className="py-2.5" dir="ltr">{s.studentNumber}</td>
+                    <td className="py-2.5">
+                      <div className="flex flex-col gap-0.5">
+                        <span>{s.user.fullName}</span>
+                        <span className="text-xs text-muted" dir="ltr">{s.studentNumber}</span>
+                      </div>
+                    </td>
                     <td className="py-2.5">
                       <div className="flex flex-col items-start gap-1">
                         <span>{s.level}</span>

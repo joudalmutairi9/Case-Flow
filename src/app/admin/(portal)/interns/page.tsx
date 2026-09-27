@@ -32,7 +32,6 @@ export default async function InternsPage() {
             <thead>
               <tr className="border-b border-border text-right text-muted">
                 <th className="pb-2">الاسم</th>
-                <th className="pb-2">اسم المستخدم</th>
                 <th className="pb-2">القسم / الدورة</th>
                 <th className="pb-2">المجموعة</th>
                 <th className="pb-2">الحالة</th>
@@ -44,8 +43,12 @@ export default async function InternsPage() {
                 const isLocked = i.user.lockedUntil && i.user.lockedUntil > new Date();
                 return (
                   <tr key={i.id} className="border-b border-border align-top last:border-0">
-                    <td className="py-2.5">{i.user.fullName}</td>
-                    <td className="py-2.5" dir="ltr">{i.user.username}</td>
+                    <td className="py-2.5">
+                      <div className="flex flex-col gap-0.5">
+                        <span>{i.user.fullName}</span>
+                        <span className="text-xs text-muted" dir="ltr">{i.user.username}</span>
+                      </div>
+                    </td>
                     <td className="py-2.5 text-muted">
                       {i.department ?? "—"} {i.rotationLabel ? `— ${i.rotationLabel}` : ""}
                     </td>
